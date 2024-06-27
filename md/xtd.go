@@ -16,8 +16,8 @@ import (
 type Xtd struct {
 	Key       []byte
 	Cc        []byte
-	Depth     byte
-	Fpt       uint32
+	Dep       byte
+	Fin       uint32
 	Chn       uint32
 	IsPrivate bool
 }
@@ -75,7 +75,7 @@ func (e *Xtd) Pub() (*btcec.PublicKey, error) {
 	return prk.PubKey(), nil
 }
 
-func (e *Xtd) GenFpt() uint32 {
+func (e *Xtd) Fingerprint() uint32 {
 	pub, _ := e.Pub()
 	h := sha256.New()
 	h.Write(pub.SerializeCompressed())
@@ -131,8 +131,8 @@ func (e *Xtd) cek(key, cc []byte, i uint32) *Xtd {
 	return &Xtd{
 		Key:       key,
 		Cc:        cc,
-		Depth:     e.Depth + 1,
-		Fpt:       e.GenFpt(),
+		Dep:       e.Dep + 1,
+		Fin:       e.Fingerprint(),
 		Chn:       i,
 		IsPrivate: e.IsPrivate,
 	}

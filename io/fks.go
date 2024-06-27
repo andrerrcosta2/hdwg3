@@ -10,7 +10,7 @@ import (
 type FileKeyStore struct{}
 
 func (f *FileKeyStore) StoreKey(key *md.Xtd, passphrase string) error {
-	filename := fmt.Sprintf("key-%d-%d.dat", key.Depth, key.ChildNumber)
+	filename := fmt.Sprintf("key-%d-%d.dat", key.Dep, key.ChildNumber)
 
 	data, err := pck.SerK(key)
 	if err != nil {

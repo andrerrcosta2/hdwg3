@@ -35,7 +35,7 @@ func (tree *HTree) Child(i uint32) (*HTree, error) {
 		return child, nil
 	}
 
-	filename := fmt.Sprintf("key-%d-%d.dat", tree.Key.Depth+1, i)
+	filename := fmt.Sprintf("key-%d-%d.dat", tree.Key.Dep+1, i)
 	childKey, err := tree.IOS.LoadKey(filename, tree.Pass)
 	if err == nil {
 		child := NewHTree(childKey, tree.IOS, tree.Fn, tree.Pass)
@@ -44,7 +44,7 @@ func (tree *HTree) Child(i uint32) (*HTree, error) {
 	}
 
 	if os.IsNotExist(err) {
-		return nil, fmt.Errorf("child key not found at depth %d, index %d", tree.Key.Depth+1, i)
+		return nil, fmt.Errorf("child key not found at depth %d, index %d", tree.Key.Dep+1, i)
 	}
 
 	return nil, err
