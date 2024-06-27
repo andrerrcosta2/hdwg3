@@ -9,12 +9,12 @@ import (
 
 func TestSerAndDesXtd(t *testing.T) {
 	xtd := &md.Xtd{
-		Key:       []byte{0x01, 0x02, 0x03, 0x04},
-		Cc:        []byte{0x05, 0x06, 0x07, 0x08},
-		Dep:       0,
-		Fin:       0,
-		Chn:       0,
-		IsPrivate: true,
+		Key:   []byte{0x01, 0x02, 0x03, 0x04},
+		Cc:    []byte{0x05, 0x06, 0x07, 0x08},
+		Dep:   0,
+		Fin:   0,
+		Chn:   0,
+		IsPvt: true,
 	}
 
 	ser, err := SerK(xtd)
@@ -24,7 +24,7 @@ func TestSerAndDesXtd(t *testing.T) {
 
 	des, err := DesK(ser)
 	if err != nil {
-		t.Fatalf("Failed to deserialize xtd: %v", err)
+		t.Fatalf("Failed on deserializing xtd: %v", err)
 	}
 
 	if !bytes.Equal(xtd.Key, des.Key) ||
@@ -32,14 +32,15 @@ func TestSerAndDesXtd(t *testing.T) {
 		xtd.Dep != des.Dep ||
 		xtd.Fin != des.Fin ||
 		xtd.Chn != des.Chn ||
-		xtd.IsPrivate != des.IsPrivate {
+		xtd.IsPvt != des.IsPvt {
 		t.Errorf("Deserialized xtd doesn't match")
 	}
 }
 
 func TestEncAndDec(t *testing.T) {
 	data := []byte("this is a test data")
-	// random pass
+
+	// generate random pass
 	pass := make([]byte, 32)
 	if _, err := rand.Read(pass); err != nil {
 		t.Fatalf("Failed to generate pass: %v", err)

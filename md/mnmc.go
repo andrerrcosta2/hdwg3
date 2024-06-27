@@ -15,5 +15,5 @@ func (m *Mnmc) String() string {
 }
 
 func (m *Mnmc) Byte() []byte {
-	return []byte(strings.Join(m.values, ""))
+	return []byte(m.String())
 }

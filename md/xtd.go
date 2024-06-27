@@ -1,6 +1,7 @@
 package md
 
 import (
+	"bytes"
 	"crypto/hmac"
 	"crypto/sha256"
 	"crypto/sha512"
@@ -14,88 +15,105 @@ import (
 )
 
 type Xtd struct {
-	Key       []byte
-	Cc        []byte
-	Dep       byte
-	Fin       uint32
-	Chn       uint32
-	IsPrivate bool
+	Key   []byte
+	Cc    []byte
+	Dep   byte
+	Fin   uint32
+	Chn   uint32
+	IsPvt bool
 }
 
 func Master(seed []byte, keySpec string) (*Xtd, error) {
-	key, cc := pck.DMaK(seed, keySpec)
+	key, cc := pck.MK(seed, keySpec)
 	return &Xtd{
-		Key:       key,
-		Cc:        cc,
-		IsPrivate: true,
+		Key:   key,
+		Cc:    cc,
+		IsPvt: true,
 	}, nil
 }
 
-func (e *Xtd) Ser() string {
-	// This is a simplified serialization function for illustration.
-	// Full serialization includes version bytes, checksum, etc.
-	// See BIP-32 for full serialization details.
-	var keyType byte
-	if e.IsPrivate {
-		keyType = 0x00
-	} else {
-		keyType = 0x02
+func (x *Xtd) Ser() (string, error) {
+	_v := x.svn()
+
+	cc := x.Cc
+	if len(cc) != 32 {
+		return "", errors.New("chain code length invalid")
 	}
-	return base58.Encode(append([]byte{keyType}, e.Key...))
+
+	kd, err := x.skd()
+	if err != nil {
+		return "", err
+	}
+
+	dep := []byte{x.Dep}
+
+	fin := make([]byte, 4)
+	binary.BigEndian.PutUint32(fin, x.Fin)
+
+	chn := make([]byte, 4)
+	binary.BigEndian.PutUint32(chn, x.Chn)
+
+	ser := bytes.Join([][]byte{_v, dep, fin, chn, cc, kd}, []byte{})
+
+	checksum := sha256.Sum256(ser)
+	checksum = sha256.Sum256(checksum[:])
+	ser = append(ser, checksum[:4]...)
+
+	return base58.Encode(ser), nil
 }
 
-func (e *Xtd) String() string {
-	return e.Ser()
+func (x *Xtd) String() (string, error) {
+	return x.Ser()
 }
 
-func (e *Xtd) Child(index uint32) (*Xtd, error) {
-	if err := e.canDerive(index); err != nil {
+func (x *Xtd) Child(index uint32) (*Xtd, error) {
+	if err := x.canDerive(index); err != nil {
 		return nil, err
 	}
 
-	data, err := e.pd(index)
+	data, err := x.pd(index)
 	if err != nil {
 		return nil, err
 	}
 
-	I := e.genHMAC(data)
+	I := x.hmac(data)
 
-	ck, err := e.ck(I)
+	ck, err := x.ck(I)
 	if err != nil {
 		return nil, err
 	}
 
 	childChainCode := I[32:]
 
-	return e.cek(ck, childChainCode, index), nil
+	return x.cek(ck, childChainCode, index), nil
 }
 
-func (e *Xtd) Pub() (*btcec.PublicKey, error) {
-	prk, _ := btcec.PrivKeyFromBytes(btcec.S256(), e.Key)
+func (x *Xtd) Pub() (*btcec.PublicKey, error) {
+	prk, _ := btcec.PrivKeyFromBytes(btcec.S256(), x.Key)
 	return prk.PubKey(), nil
 }
 
-func (e *Xtd) Fingerprint() uint32 {
-	pub, _ := e.Pub()
+func (x *Xtd) Fingerprint() uint32 {
+	pub, _ := x.Pub()
 	h := sha256.New()
 	h.Write(pub.SerializeCompressed())
 	fingerprint := h.Sum(nil)[:4]
 	return binary.BigEndian.Uint32(fingerprint)
 }
 
-func (e *Xtd) canDerive(index uint32) error {
-	if index >= hdkeychain.HardenedKeyStart && !e.IsPrivate {
+func (x *Xtd) canDerive(index uint32) error {
+	if index >= hdkeychain.HardenedKeyStart && !x.IsPvt {
 		return errors.New("cannot derive hardened key from public key")
 	}
 	return nil
 }
 
-func (e *Xtd) pd(index uint32) ([]byte, error) {
+func (x *Xtd) pd(index uint32) ([]byte, error) {
 	var data []byte
 	if index >= hdkeychain.HardenedKeyStart {
-		data = append([]byte{0x00}, e.Key...)
+		data = append([]byte{0x00}, x.Key...)
 	} else {
-		pubKey, err := e.Pub()
+		pubKey, err := x.Pub()
 		if err != nil {
 			return nil, err
 		}
@@ -109,31 +127,53 @@ func (e *Xtd) pd(index uint32) ([]byte, error) {
 	return data, nil
 }
 
-func (e *Xtd) genHMAC(data []byte) []byte {
-	hmac := hmac.New(sha512.New, e.Cc)
+func (x *Xtd) hmac(data []byte) []byte {
+	hmac := hmac.New(sha512.New, x.Cc)
 	hmac.Write(data)
 	return hmac.Sum(nil)
 }
 
-func (e *Xtd) ck(I []byte) ([]byte, error) {
+func (x *Xtd) ck(I []byte) ([]byte, error) {
 	il := new(big.Int).SetBytes(I[:32])
 	il = il.Mod(il, btcec.S256().N)
 	if il.Sign() == 0 {
 		return nil, errors.New("invalid child key")
 	}
 
-	childKey := new(big.Int).Add(new(big.Int).SetBytes(e.Key), il)
+	childKey := new(big.Int).Add(new(big.Int).SetBytes(x.Key), il)
 	childKey = childKey.Mod(childKey, btcec.S256().N)
 	return childKey.Bytes(), nil
 }
 
-func (e *Xtd) cek(key, cc []byte, i uint32) *Xtd {
+func (x *Xtd) cek(key, cc []byte, i uint32) *Xtd {
 	return &Xtd{
-		Key:       key,
-		Cc:        cc,
-		Dep:       e.Dep + 1,
-		Fin:       e.Fingerprint(),
-		Chn:       i,
-		IsPrivate: e.IsPrivate,
+		Key:   key,
+		Cc:    cc,
+		Dep:   x.Dep + 1,
+		Fin:   x.Fingerprint(),
+		Chn:   i,
+		IsPvt: x.IsPvt,
+	}
+}
+
+func (x *Xtd) svn() []byte {
+	var v []byte
+	if x.IsPvt {
+		v = []byte{0x04, 0x88, 0xAD, 0xE4}
+	} else {
+		v = []byte{0x04, 0x88, 0xB2, 0x1E}
+	}
+	return v
+}
+
+func (x *Xtd) skd() ([]byte, error) {
+	if x.IsPvt {
+		return append([]byte{0x00}, x.Key...), nil
+	} else {
+		puk, err := x.Pub()
+		if err != nil {
+			return []byte{}, err
+		}
+		return puk.SerializeCompressed(), nil
 	}
 }

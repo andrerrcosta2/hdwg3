@@ -20,14 +20,14 @@ func SerK(key *md.Xtd) ([]byte, error) {
 }
 
 func DesK(data []byte) (*md.Xtd, error) {
-	var key md.Xtd
+	var x md.Xtd
 	buf := bytes.NewBuffer(data)
 	dec := gob.NewDecoder(buf)
-	err := dec.Decode(&key)
+	err := dec.Decode(&x)
 	if err != nil {
 		return nil, err
 	}
-	return &key, nil
+	return &x, nil
 }
 
 func Encr(data []byte, passphrase string) ([]byte, error) {
@@ -46,8 +46,7 @@ func Encr(data []byte, passphrase string) ([]byte, error) {
 		return nil, err
 	}
 
-	ciphertext := gcm.Seal(nonce, nonce, data, nil)
-	return ciphertext, nil
+	return gcm.Seal(nonce, nonce, data, nil), nil
 }
 
 func Decr(data []byte, passphrase string) ([]byte, error) {
@@ -62,12 +61,12 @@ func Decr(data []byte, passphrase string) ([]byte, error) {
 	}
 
 	nonceSize := gcm.NonceSize()
-	nonce, ciphertext := data[:nonceSize], data[nonceSize:]
+	nonce, ctxt := data[:nonceSize], data[nonceSize:]
 
-	plaintext, err := gcm.Open(nil, nonce, ciphertext, nil)
+	ptxt, err := gcm.Open(nil, nonce, ctxt, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	return plaintext, nil
+	return ptxt, nil
 }

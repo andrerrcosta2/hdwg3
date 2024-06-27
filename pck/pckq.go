@@ -7,11 +7,11 @@ import (
 	"hdwg3/md"
 )
 
-func MnmcToSeed(m md.Mnmc, passphrase string) []byte {
+func Seed(m md.Mnmc, passphrase string) []byte {
 	return pbkdf2.Key(m.Byte(), []byte("mnemonic"+passphrase), 2048, 64, sha512.New)
 }
 
-func DMaK(seed []byte, keySpec string) ([]byte, []byte) {
+func MK(seed []byte, keySpec string) ([]byte, []byte) {
 	k := []byte(keySpec)
 	I := hmacSHA512(k, seed)
 	return I[:32], I[32:]

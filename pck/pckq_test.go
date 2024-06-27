@@ -22,7 +22,7 @@ func TestMnmcToSeed(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		seed := MnmcToSeed(test.mnemonic, test.passphrase)
+		seed := Seed(test.mnemonic, test.passphrase)
 		seedHex := hex.EncodeToString(seed)
 		if seedHex != test.expectedSeed {
 			t.Errorf("Expected seed %s, got %s", test.expectedSeed, seedHex)
@@ -46,7 +46,7 @@ func TestDMaK(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		mk, cc := DMaK(test.seed, test.keySpec)
+		mk, cc := MK(test.seed, test.keySpec)
 		mk16 := hex.EncodeToString(mk)
 		cc16 := hex.EncodeToString(cc)
 		if mk16 != test.expMK {
