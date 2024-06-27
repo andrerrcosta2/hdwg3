@@ -3,7 +3,7 @@ package io
 import (
 	"fmt"
 	"hdwg3/md"
-	"hdwg3/pkc"
+	"hdwg3/pck"
 	"os"
 )
 
@@ -12,12 +12,12 @@ type FileKeyStore struct{}
 func (f *FileKeyStore) StoreKey(key *md.Xtd, passphrase string) error {
 	filename := fmt.Sprintf("key-%d-%d.dat", key.Depth, key.ChildNumber)
 
-	data, err := pkc.SerK(key)
+	data, err := pck.SerK(key)
 	if err != nil {
 		return err
 	}
 
-	encryptedData, err := pkc.Encr(data, passphrase)
+	encryptedData, err := pck.Encr(data, passphrase)
 	if err != nil {
 		return err
 	}
@@ -31,10 +31,10 @@ func (f *FileKeyStore) LoadKey(filename, passphrase string) (*md.Xtd, error) {
 		return nil, err
 	}
 
-	data, err := pkc.Decr(encryptedData, passphrase)
+	data, err := pck.Decr(encryptedData, passphrase)
 	if err != nil {
 		return nil, err
 	}
 
-	return pkc.DesK(data)
+	return pck.DesK(data)
 }

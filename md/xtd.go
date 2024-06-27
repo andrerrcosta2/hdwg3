@@ -9,7 +9,7 @@ import (
 	"github.com/btcsuite/btcd/btcec"
 	"github.com/btcsuite/btcutil/base58"
 	"github.com/btcsuite/btcutil/hdkeychain"
-	"hdwg3/pkc"
+	"hdwg3/pck"
 	"math/big"
 )
 
@@ -23,7 +23,7 @@ type Xtd struct {
 }
 
 func Master(seed []byte, keySpec string) (*Xtd, error) {
-	key, cc := pkc.DMaK(seed, keySpec)
+	key, cc := pck.DMaK(seed, keySpec)
 	return &Xtd{
 		Key:       key,
 		Cc:        cc,

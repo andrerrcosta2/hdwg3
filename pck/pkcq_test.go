@@ -1,4 +1,4 @@
-package pkc
+package pck
 
 import (
 	"crypto/sha512"
