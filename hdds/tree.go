@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"hdwg3/io"
 	"hdwg3/md"
+	"os"
 	"sync"
 )
 
@@ -26,27 +27,39 @@ func NewHTree(key *md.Xtd, ios io.IOS, filename, pass string) *HTree {
 	}
 }
 
-func (tree *HTree) GetChild(index uint32) (*HTree, error) {
+func (tree *HTree) Child(i uint32) (*HTree, error) {
 	tree.mtx.Lock()
 	defer tree.mtx.Unlock()
 
-	if child, exists := tree.Chn[index]; exists {
+	if child, exists := tree.Chn[i]; exists {
 		return child, nil
 	}
 
-	childKey, err := tree.Key.Child(index)
-	if err != nil {
-		return nil, err
+	filename := fmt.Sprintf("key-%d-%d.dat", tree.Key.Depth+1, i)
+	childKey, err := tree.IOS.LoadKey(filename, tree.Pass)
+	if err == nil {
+		child := NewHTree(childKey, tree.IOS, tree.Fn, tree.Pass)
+		tree.Chn[i] = child
+		return child, nil
 	}
 
-	child := NewHTree(childKey, tree.IOS, tree.Fn, tree.Pass)
-	tree.Chn[index] = child
-
-	// Optionally store the child key to persistent storage
-	err = tree.IOS.StoreKey(childKey, fmt.Sprintf("%s-%d", tree.Fn, index), tree.Pass)
-	if err != nil {
-		return nil, err
+	if os.IsNotExist(err) {
+		return nil, fmt.Errorf("child key not found at depth %d, index %d", tree.Key.Depth+1, i)
 	}
 
-	return child, nil
+	return nil, err
+}
+
+func (tree *HTree) KeyAt(path []uint32) (*HTree, error) {
+	current := tree
+	var err error
+
+	for _, index := range path {
+		current, err = current.Child(index)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return current, nil
 }

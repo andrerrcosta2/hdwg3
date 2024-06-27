@@ -1,6 +1,7 @@
 package io
 
 import (
+	"fmt"
 	"hdwg3/md"
 	"hdwg3/pkc"
 	"os"
@@ -8,7 +9,9 @@ import (
 
 type FileKeyStore struct{}
 
-func (f *FileKeyStore) StoreKey(key *md.Xtd, filename, passphrase string) error {
+func (f *FileKeyStore) StoreKey(key *md.Xtd, passphrase string) error {
+	filename := fmt.Sprintf("key-%d-%d.dat", key.Depth, key.ChildNumber)
+
 	data, err := pkc.SerK(key)
 	if err != nil {
 		return err
