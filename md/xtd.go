@@ -55,9 +55,9 @@ func (x *Xtd) Ser() (string, error) {
 
 	ser := bytes.Join([][]byte{_v, dep, fin, chn, cc, kd}, []byte{})
 
-	checksum := sha256.Sum256(ser)
-	checksum = sha256.Sum256(checksum[:])
-	ser = append(ser, checksum[:4]...)
+	chksum := sha256.Sum256(ser)
+	chksum = sha256.Sum256(chksum[:])
+	ser = append(ser, chksum[:4]...)
 
 	return base58.Encode(ser), nil
 }
@@ -66,12 +66,12 @@ func (x *Xtd) String() (string, error) {
 	return x.Ser()
 }
 
-func (x *Xtd) Child(index uint32) (*Xtd, error) {
-	if err := x.canDerive(index); err != nil {
+func (x *Xtd) Child(i uint32) (*Xtd, error) {
+	if err := x.canDerive(i); err != nil {
 		return nil, err
 	}
 
-	data, err := x.pd(index)
+	data, err := x.pd(i)
 	if err != nil {
 		return nil, err
 	}
@@ -83,9 +83,16 @@ func (x *Xtd) Child(index uint32) (*Xtd, error) {
 		return nil, err
 	}
 
-	childChainCode := I[32:]
+	return &Xtd{
+		Key:   ck,
+		Cc:    I[32:],
+		Dep:   x.Dep + 1,
+		Fin:   x.Fingerprint(),
+		Chn:   i,
+		IsPvt: x.IsPvt,
+	}, nil
 
-	return x.cek(ck, childChainCode, index), nil
+	//return x.cek(ck, childChainCode, i), nil
 }
 
 func (x *Xtd) Pub() (*btcec.PublicKey, error) {
@@ -101,30 +108,30 @@ func (x *Xtd) Fingerprint() uint32 {
 	return binary.BigEndian.Uint32(fingerprint)
 }
 
-func (x *Xtd) canDerive(index uint32) error {
-	if index >= hdkeychain.HardenedKeyStart && !x.IsPvt {
+func (x *Xtd) canDerive(i uint32) error {
+	if isHdn(i) && !x.IsPvt {
 		return errors.New("cannot derive hardened key from public key")
 	}
 	return nil
 }
 
-func (x *Xtd) pd(index uint32) ([]byte, error) {
-	var data []byte
-	if index >= hdkeychain.HardenedKeyStart {
-		data = append([]byte{0x00}, x.Key...)
+func (x *Xtd) pd(i uint32) ([]byte, error) {
+	var dat []byte
+	if isHdn(i) {
+		dat = append([]byte{0x00}, x.Key...)
 	} else {
-		pubKey, err := x.Pub()
+		pub, err := x.Pub()
 		if err != nil {
 			return nil, err
 		}
-		data = pubKey.SerializeCompressed()
+		dat = pub.SerializeCompressed()
 	}
 
-	indexBytes := make([]byte, 4)
-	binary.BigEndian.PutUint32(indexBytes, index)
-	data = append(data, indexBytes...)
+	bit := make([]byte, 4)
+	binary.BigEndian.PutUint32(bit, i)
+	dat = append(dat, bit...)
 
-	return data, nil
+	return dat, nil
 }
 
 func (x *Xtd) hmac(data []byte) []byte {
@@ -176,4 +183,8 @@ func (x *Xtd) skd() ([]byte, error) {
 		}
 		return puk.SerializeCompressed(), nil
 	}
+}
+
+func isHdn(i uint32) bool {
+	return i >= hdkeychain.HardenedKeyStart
 }
