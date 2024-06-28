@@ -2,9 +2,7 @@ package md
 
 import (
 	"bytes"
-	"crypto/hmac"
 	"crypto/sha256"
-	"crypto/sha512"
 	"encoding/binary"
 	"errors"
 	"github.com/btcsuite/btcd/btcec"
@@ -37,7 +35,7 @@ func (x *Xtd) Ser() (string, error) {
 
 	cc := x.Cc
 	if len(cc) != 32 {
-		return "", errors.New("chain code length invalid")
+		return "", errors.New("invalid chain code")
 	}
 
 	kd, err := x.skd()
@@ -76,7 +74,7 @@ func (x *Xtd) Child(i uint32) (*Xtd, error) {
 		return nil, err
 	}
 
-	I := x.hmac(dat)
+	I := pck.HmacSHA512(x.Cc, dat)
 
 	ck, err := x.ck(I)
 	if err != nil {
@@ -128,12 +126,6 @@ func (x *Xtd) pd(i uint32) ([]byte, error) {
 	dat = append(dat, bit...)
 
 	return dat, nil
-}
-
-func (x *Xtd) hmac(data []byte) []byte {
-	hmac := hmac.New(sha512.New, x.Cc)
-	hmac.Write(data)
-	return hmac.Sum(nil)
 }
 
 func (x *Xtd) ck(I []byte) ([]byte, error) {

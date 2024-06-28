@@ -14,8 +14,8 @@ func Seed(m md.Mnmc, passphrase string) []byte {
 
 func MK(seed []byte, keySpec string) ([]byte, []byte) {
 	k := []byte(keySpec)
-	I := hmacSHA512(k, seed)
-	return I[:32], I[32:]
+	i := HmacSHA512(k, seed)
+	return i[:32], i[32:]
 }
 
 func HSP(h func() hash.Hash, d []byte) []byte {
@@ -24,7 +24,7 @@ func HSP(h func() hash.Hash, d []byte) []byte {
 	return hr.Sum(nil)
 }
 
-func hmacSHA512(key, data []byte) []byte {
+func HmacSHA512(key, data []byte) []byte {
 	h := hmac.New(sha512.New, key)
 	h.Write(data)
 	return h.Sum(nil)

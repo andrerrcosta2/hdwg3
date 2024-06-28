@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 	"hdwg3/_test"
+	"hdwg3/pck"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -77,21 +78,12 @@ func TestPd(t *testing.T) {
 	assert.NotEmpty(t, data)
 }
 
-func TestHmac(t *testing.T) {
-	seed, _ := hex.DecodeString("000102030405060708090a0b0c0d0e0f")
-	xtd, _ := Master(seed, _test.KEY_SPEC)
-
-	data, _ := xtd.pd(0)
-	hmac := xtd.hmac(data)
-	assert.NotEmpty(t, hmac)
-}
-
 func TestCk(t *testing.T) {
 	seed, _ := hex.DecodeString("000102030405060708090a0b0c0d0e0f")
 	xtd, _ := Master(seed, _test.KEY_SPEC)
 
 	data, _ := xtd.pd(0)
-	hmac := xtd.hmac(data)
+	hmac := pck.HmacSHA512(xtd.Cc, data)
 	ck, err := xtd.ck(hmac)
 	assert.NoError(t, err)
 	assert.NotEmpty(t, ck)
@@ -102,7 +94,7 @@ func TestCek(t *testing.T) {
 	xtd, _ := Master(seed, _test.KEY_SPEC)
 
 	data, _ := xtd.pd(0)
-	hmac := xtd.hmac(data)
+	hmac := pck.HmacSHA512(xtd.Cc, data)
 	ck, _ := xtd.ck(hmac)
 	cek := xtd.cek(ck, hmac[32:], 0)
 	assert.NotNil(t, cek)

@@ -10,6 +10,7 @@ import (
 	"hdwg3/io"
 	"hdwg3/md"
 	"hdwg3/pck"
+	"hdwg3/pfx"
 	"os"
 	"strconv"
 	"strings"
@@ -61,7 +62,7 @@ func (tree *HTree) CreateChild(i uint32) (*HTree, error) {
 	tree.mtx.Lock()
 	defer tree.mtx.Unlock()
 
-	if c, exists := tree.Chn[i]; exists {
+	if c, ext := tree.Chn[i]; ext {
 		return c, nil
 	}
 
@@ -72,22 +73,20 @@ func (tree *HTree) CreateChild(i uint32) (*HTree, error) {
 		return child, nil
 	}
 
-	// If the c key doesn't exist in storage, generate a new one
 	if os.IsNotExist(err) {
 		ck, err = tree.Key.Child(i)
 		if err != nil {
 			return nil, fmt.Errorf("failed to generate c key: %v", err)
 		}
 
-		// Store the newly generated c key
 		err = tree.IOS.StoreKey(tree.Pass, ck, tree.Key.Dep+1, i)
 		if err != nil {
 			return nil, fmt.Errorf("failed to store c key: %v", err)
 		}
 
-		child := NewHTree(ck, tree.IOS, tree.Fn, tree.Pass)
-		tree.Chn[i] = child
-		return child, nil
+		chi := NewHTree(ck, tree.IOS, tree.Fn, tree.Pass)
+		tree.Chn[i] = chi
+		return chi, nil
 	}
 
 	return nil, err
@@ -120,7 +119,7 @@ func (tree *HTree) Addr(path string) (string, error) {
 	s256h := pck.HSP(sha256.New, pub.SerializeCompressed())
 	pkh := pck.HSP(ripemd160.New, s256h)
 
-	_v := append([]byte{0x00}, pkh...)
+	_v := append(pfx.ADDR_V, pkh...)
 
 	h1 := pck.HSP(sha256.New, _v)
 	h2 := pck.HSP(sha256.New, h1)
