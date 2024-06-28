@@ -42,7 +42,7 @@ func TestChild(t *testing.T) {
 func TestFingerprint(t *testing.T) {
 	seed, _ := hex.DecodeString("000102030405060708090a0b0c0d0e0f")
 	xtd, _ := Master(seed, _test.KEY_SPEC)
-	fin := xtd.Fingerprint()
+	fin := xtd.Fpt()
 
 	pub, _ := xtd.Pub()
 	h := sha256.New()
@@ -107,7 +107,7 @@ func TestCek(t *testing.T) {
 	cek := xtd.cek(ck, hmac[32:], 0)
 	assert.NotNil(t, cek)
 	assert.Equal(t, xtd.Dep+1, cek.Dep)
-	assert.Equal(t, xtd.Fingerprint(), cek.Fin)
+	assert.Equal(t, xtd.Fpt(), cek.Fin)
 	assert.Equal(t, uint32(0), cek.Chn)
 }
 

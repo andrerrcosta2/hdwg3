@@ -71,12 +71,12 @@ func (x *Xtd) Child(i uint32) (*Xtd, error) {
 		return nil, err
 	}
 
-	data, err := x.pd(i)
+	dat, err := x.pd(i)
 	if err != nil {
 		return nil, err
 	}
 
-	I := x.hmac(data)
+	I := x.hmac(dat)
 
 	ck, err := x.ck(I)
 	if err != nil {
@@ -87,12 +87,10 @@ func (x *Xtd) Child(i uint32) (*Xtd, error) {
 		Key:   ck,
 		Cc:    I[32:],
 		Dep:   x.Dep + 1,
-		Fin:   x.Fingerprint(),
+		Fin:   x.Fpt(),
 		Chn:   i,
 		IsPvt: x.IsPvt,
 	}, nil
-
-	//return x.cek(ck, childChainCode, i), nil
 }
 
 func (x *Xtd) Pub() (*btcec.PublicKey, error) {
@@ -100,12 +98,10 @@ func (x *Xtd) Pub() (*btcec.PublicKey, error) {
 	return prk.PubKey(), nil
 }
 
-func (x *Xtd) Fingerprint() uint32 {
+func (x *Xtd) Fpt() uint32 {
 	pub, _ := x.Pub()
-	h := sha256.New()
-	h.Write(pub.SerializeCompressed())
-	fingerprint := h.Sum(nil)[:4]
-	return binary.BigEndian.Uint32(fingerprint)
+	sh := pck.HSP(sha256.New, pub.SerializeCompressed())
+	return binary.BigEndian.Uint32(sh[:4])
 }
 
 func (x *Xtd) canDerive(i uint32) error {
@@ -157,7 +153,7 @@ func (x *Xtd) cek(key, cc []byte, i uint32) *Xtd {
 		Key:   key,
 		Cc:    cc,
 		Dep:   x.Dep + 1,
-		Fin:   x.Fingerprint(),
+		Fin:   x.Fpt(),
 		Chn:   i,
 		IsPvt: x.IsPvt,
 	}
