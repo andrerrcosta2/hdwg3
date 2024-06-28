@@ -1,9 +1,8 @@
 package io
 
 import (
+	"hdwg3/cpt"
 	"hdwg3/io/fioss"
-	"hdwg3/md"
-	"hdwg3/pck"
 	"os"
 )
 
@@ -11,18 +10,18 @@ type FileKeyStore struct {
 	sem fioss.Fioss
 }
 
-func (f *FileKeyStore) StoreKey(passphrase string, key *md.Xtd, args ...interface{}) error {
+func (f *FileKeyStore) StoreKey(passphrase string, key *cpt.Xtd, args ...interface{}) error {
 	fn, err := f.sem.StoreQuery(args)
 	if err != nil {
 		return err
 	}
 
-	data, err := pck.SerK(key)
+	data, err := cpt.SerK(key)
 	if err != nil {
 		return err
 	}
 
-	enc, err := pck.Encr(data, passphrase)
+	enc, err := cpt.Encr(data, passphrase)
 	if err != nil {
 		return err
 	}
@@ -30,7 +29,7 @@ func (f *FileKeyStore) StoreKey(passphrase string, key *md.Xtd, args ...interfac
 	return os.WriteFile(fn, enc, 0644)
 }
 
-func (f *FileKeyStore) LoadKey(passphrase string, args ...interface{}) (*md.Xtd, error) {
+func (f *FileKeyStore) LoadKey(passphrase string, args ...interface{}) (*cpt.Xtd, error) {
 	filename, err := f.sem.LoadQuery(args)
 	if err != nil {
 		return nil, err
@@ -41,11 +40,11 @@ func (f *FileKeyStore) LoadKey(passphrase string, args ...interface{}) (*md.Xtd,
 		return nil, err
 	}
 
-	data, err := pck.Decr(enc, passphrase)
+	data, err := cpt.Decr(enc, passphrase)
 	if err != nil {
 
 		return nil, err
 	}
 
-	return pck.DesK(data)
+	return cpt.DesK(data)
 }

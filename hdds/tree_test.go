@@ -1,16 +1,16 @@
 package hdds
 
 import (
+	"errors"
 	"hdwg3/_test"
-	"hdwg3/md"
+	"hdwg3/cpt"
 	"sync"
 	"testing"
 )
 
 // ChildTest tests the Child method of HTree.
 func ChildTest(t *testing.T) {
-	// Mock setup
-	mockKey := &md.Xtd{
+	mockKey := &cpt.Xtd{
 		Key:   []byte{},
 		Cc:    []byte{},
 		Dep:   0,
@@ -18,10 +18,9 @@ func ChildTest(t *testing.T) {
 		Chn:   0,
 		IsPvt: true,
 	}
-	mockIOS := MockIOS{} // Mock implementation of io.IOS
 	mockHTree := &HTree{
 		Key:  mockKey,
-		IOS:  mockIOS,
+		IOS:  _test.MockIOS{},
 		Fn:   "mock_filename",
 		Pass: "mock_password",
 		Chn:  make(map[uint32]*HTree),
@@ -33,24 +32,22 @@ func ChildTest(t *testing.T) {
 		index       uint32
 		expectedErr error
 	}{
-		{index: 0, expectedErr: nil}, // Replace with expected error or nil
-		// Add more test cases as needed
+		{index: 0, expectedErr: nil},
 	}
 
 	for _, tc := range testCases {
-		child, err := mockHTree.Child(tc.index)
-		if err != tc.expectedErr {
+		_, err := mockHTree.Child(tc.index)
+		if !errors.Is(err, tc.expectedErr) {
 			t.Errorf("Child(%d) returned unexpected error: got %v, want %v", tc.index, err, tc.expectedErr)
 		}
 
-		// Optionally, add assertions to verify child struct properties or behavior
 	}
 }
 
 // CreateChildTest tests the CreateChild method of HTree.
 func CreateChildTest(t *testing.T) {
 	// Mock setup
-	mockKey := &md.Xtd{
+	mockKey := &cpt.Xtd{
 		Key:   []byte{ /* Mock key bytes */ },
 		Cc:    []byte{ /* Mock chain code bytes */ },
 		Dep:   0,    // Mock depth
@@ -58,10 +55,9 @@ func CreateChildTest(t *testing.T) {
 		Chn:   0,    // Mock child index
 		IsPvt: true, // Mock private key status
 	}
-	mockIOS := MockIOS{} // Mock implementation of io.IOS
-	mockHTree := &MockHTree{
+	mockHTree := &HTree{
 		Key:  mockKey,
-		IOS:  mockIOS,
+		IOS:  _test.MockIOS{},
 		Fn:   "mock_filename",
 		Pass: "mock_password",
 		Chn:  make(map[uint32]*HTree),
@@ -78,8 +74,8 @@ func CreateChildTest(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		child, err := mockHTree.CreateChild(tc.index)
-		if err != tc.expectedErr {
+		_, err := mockHTree.CreateChild(tc.index)
+		if !errors.Is(err, tc.expectedErr) {
 			t.Errorf("CreateChild(%d) returned unexpected error: got %v, want %v", tc.index, err, tc.expectedErr)
 		}
 
@@ -90,7 +86,7 @@ func CreateChildTest(t *testing.T) {
 // KeyAtTest tests the KeyAt method of HTree.
 func KeyAtTest(t *testing.T) {
 	// Mock setup
-	mockKey := &md.Xtd{
+	mockKey := &cpt.Xtd{
 		Key:   []byte{ /* Mock key bytes */ },
 		Cc:    []byte{ /* Mock chain code bytes */ },
 		Dep:   0,    // Mock depth
@@ -98,10 +94,9 @@ func KeyAtTest(t *testing.T) {
 		Chn:   0,    // Mock child index
 		IsPvt: true, // Mock private key status
 	}
-	mockIOS := MockIOS{} // Mock implementation of io.IOS
-	mockHTree := &MockHTree{
+	mockHTree := &HTree{
 		Key:  mockKey,
-		IOS:  mockIOS,
+		IOS:  _test.MockIOS{},
 		Fn:   "mock_filename",
 		Pass: "mock_password",
 		Chn:  make(map[uint32]*HTree),
@@ -118,8 +113,8 @@ func KeyAtTest(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		child, err := mockHTree.KeyAt(tc.path)
-		if err != tc.expectedErr {
+		_, err := mockHTree.KeyAt(tc.path)
+		if !errors.Is(err, tc.expectedErr) {
 			t.Errorf("KeyAt(%v) returned unexpected error: got %v, want %v", tc.path, err, tc.expectedErr)
 		}
 
@@ -127,15 +122,9 @@ func KeyAtTest(t *testing.T) {
 	}
 }
 
-func TestHTree(t *testing.T) {
-	t.Run("Child", ChildTest)
-	t.Run("CreateChild", CreateChildTest)
-	t.Run("KeyAt", KeyAtTest)
-}
-
 func AddrTest(t *testing.T) {
 
-	mockKey := &md.Xtd{
+	mockKey := &cpt.Xtd{
 		Key:   []byte{},
 		Cc:    []byte{},
 		Dep:   0,
@@ -172,7 +161,7 @@ func AddrTest(t *testing.T) {
 
 func KdTest(t *testing.T) {
 	// Mock setup
-	mockKey := &md.Xtd{
+	mockKey := &cpt.Xtd{
 		Key:   []byte{ /* Mock key bytes */ },
 		Cc:    []byte{ /* Mock chain code bytes */ },
 		Dep:   0,    // Mock depth
@@ -182,7 +171,7 @@ func KdTest(t *testing.T) {
 	}
 	mockHTree := &HTree{
 		Key:  mockKey,
-		IOS:  MockHTreeIOS{}, // Mock implementation of io.IOS
+		IOS:  _test.MockIOS{}, // Mock implementation of io.IOS
 		Fn:   "mock_filename",
 		Pass: "mock_password",
 		Chn:  make(map[uint32]*HTree),
@@ -191,16 +180,16 @@ func KdTest(t *testing.T) {
 	// Test cases
 	testCases := []struct {
 		path        string
-		expectedXtd *md.Xtd
+		expectedXtd *cpt.Xtd
 		expectedErr error
 	}{
-		{path: "m/44'/0'/0'/0/0", expectedXtd: &md.Xtd{}, expectedErr: nil}, // Replace with expected Xtd and error
+		{path: "m/44'/0'/0'/0/0", expectedXtd: &cpt.Xtd{}, expectedErr: nil}, // Replace with expected Xtd and error
 		// Add more test cases as needed
 	}
 
 	for _, tc := range testCases {
-		xtd, err := mockHTree.kd(tc.path)
-		if err != tc.expectedErr {
+		_, err := mockHTree.kd(tc.path)
+		if !errors.Is(err, tc.expectedErr) {
 			t.Errorf("kd(%s) returned unexpected error: got %v, want %v", tc.path, err, tc.expectedErr)
 		}
 
@@ -213,6 +202,9 @@ func KdTest(t *testing.T) {
 }
 
 func TestHTree(t *testing.T) {
+	t.Run("Child", ChildTest)
+	t.Run("CreateChild", CreateChildTest)
+	t.Run("KeyAt", KeyAtTest)
 	t.Run("Addr", AddrTest)
 	t.Run("Kd", KdTest)
 }

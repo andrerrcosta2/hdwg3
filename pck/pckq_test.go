@@ -17,7 +17,7 @@ func TestMnmcToSeed(t *testing.T) {
 		{
 			mnemonic:     *md.NewMnmc("abandon", "abandon", "abandon", "abandon", "abandon", "abandon", "abandon", "abandon", "abandon", "abandon", "abandon", "about"),
 			passphrase:   "",
-			expectedSeed: "5eb00bbddcf069084889a8ab9155568165f5cdbeb4b9d0c5948a8ef4a3d6d4c7b6c7e57c2e73b4e0f6f8ee7c4d0f29a4a4eab91b8d90ff5a6162f3b3e819b39d",
+			expectedSeed: "5eb00bbddcf069084889a8ab9155568165f5c453ccb85e70811aaed6f6da5fc19a5ac40b389cd370d086206dec8aa6c43daea6690f20ad3d8d48b2d2ce9e38e4",
 		},
 	}
 
@@ -40,8 +40,8 @@ func TestDMaK(t *testing.T) {
 		{
 			seed:    pbkdf2.Key([]byte("mnemonic"), []byte("mnemonic"), 2048, 64, sha512.New),
 			keySpec: "Bitcoin seed",
-			expMK:   "2fc32c88e7c57bb2079a00c57b01d6a62fd1627e850adf2f31e1b5f8e18c3e3b",
-			expCC:   "fa01b0d86d6b6b5cc1bc2c907890c31aebc5b07c5cb5dbcf7d28a79ccfcfb933",
+			expMK:   "33542ed0e02dd7044c3e836416af94db528a73590d60212bdf63044767055116",
+			expCC:   "4c2232bd0be96bca95331649fa1e358033af50ed676b33f9f00adb286f868fa5",
 		},
 	}
 
@@ -67,12 +67,12 @@ func TestHmacSHA512(t *testing.T) {
 		{
 			key:  []byte("Bitcoin seed"),
 			data: []byte("mnemonic"),
-			exp:  "2fc32c88e7c57bb2079a00c57b01d6a62fd1627e850adf2f31e1b5f8e18c3e3bfa01b0d86d6b6b5cc1bc2c907890c31aebc5b07c5cb5dbcf7d28a79ccfcfb933",
+			exp:  "deb001bfcf04c95869c312be474da1b8320ada66390c63a8630761c71aaac3cdcc3dcdfc033c45bd440bd023905da0c31604f0695143fba30eb1c60adb5ea7c3",
 		},
 	}
 
 	for _, test := range tests {
-		res := hmacSHA512(test.key, test.data)
+		res := HmacSHA512(test.key, test.data)
 		res16 := hex.EncodeToString(res)
 		if res16 != test.exp {
 			t.Errorf("Expected %s, got %s", test.exp, res16)

@@ -1,4 +1,4 @@
-package pck
+package cpt
 
 import (
 	"bytes"
@@ -6,10 +6,9 @@ import (
 	"crypto/cipher"
 	"crypto/rand"
 	"encoding/gob"
-	"hdwg3/md"
 )
 
-func SerK(key *md.Xtd) ([]byte, error) {
+func SerK(key *Xtd) ([]byte, error) {
 	var buf bytes.Buffer
 	enc := gob.NewEncoder(&buf)
 	err := enc.Encode(key)
@@ -19,8 +18,8 @@ func SerK(key *md.Xtd) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-func DesK(data []byte) (*md.Xtd, error) {
-	var x md.Xtd
+func DesK(data []byte) (*Xtd, error) {
+	var x Xtd
 	buf := bytes.NewBuffer(data)
 	dec := gob.NewDecoder(buf)
 	err := dec.Decode(&x)

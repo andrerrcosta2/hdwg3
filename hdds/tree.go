@@ -7,8 +7,8 @@ import (
 	"github.com/btcsuite/btcutil/base58"
 	"github.com/btcsuite/btcutil/hdkeychain"
 	"golang.org/x/crypto/ripemd160"
+	"hdwg3/cpt"
 	"hdwg3/io"
-	"hdwg3/md"
 	"hdwg3/pck"
 	"hdwg3/pfx"
 	"os"
@@ -18,7 +18,7 @@ import (
 )
 
 type HTree struct {
-	Key  *md.Xtd
+	Key  *cpt.Xtd
 	IOS  io.IOS
 	Fn   string
 	Pass string
@@ -26,7 +26,7 @@ type HTree struct {
 	mtx  sync.Mutex
 }
 
-func NewHTree(key *md.Xtd, ios io.IOS, filename, pass string) *HTree {
+func NewHTree(key *cpt.Xtd, ios io.IOS, filename, pass string) *HTree {
 	return &HTree{
 		Key:  key,
 		IOS:  ios,
@@ -127,7 +127,7 @@ func (tree *HTree) Addr(path string) (string, error) {
 	return base58.Encode(append(_v, h2[:4]...)), nil
 }
 
-func (tree *HTree) kd(path string) (*md.Xtd, error) {
+func (tree *HTree) kd(path string) (*cpt.Xtd, error) {
 	k := tree.Key
 	cs := strings.Split(path, "/")[1:]
 

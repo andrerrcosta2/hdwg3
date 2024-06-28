@@ -1,4 +1,4 @@
-package md
+package cpt
 
 import (
 	"crypto/sha256"

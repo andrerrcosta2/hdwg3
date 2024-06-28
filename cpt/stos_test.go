@@ -1,14 +1,13 @@
-package pck
+package cpt
 
 import (
 	"bytes"
 	"crypto/rand"
-	"hdwg3/md"
 	"testing"
 )
 
 func TestSerAndDesXtd(t *testing.T) {
-	xtd := &md.Xtd{
+	xtd := &Xtd{
 		Key:   []byte{0x01, 0x02, 0x03, 0x04},
 		Cc:    []byte{0x05, 0x06, 0x07, 0x08},
 		Dep:   0,

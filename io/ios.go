@@ -1,10 +1,10 @@
 package io
 
 import (
-	"hdwg3/md"
+	"hdwg3/cpt"
 )
 
 type IOS interface {
-	StoreKey(passphrase string, key *md.Xtd, params ...interface{}) error
-	LoadKey(passphrase string, params ...interface{}) (*md.Xtd, error)
+	StoreKey(passphrase string, key *cpt.Xtd, params ...interface{}) error
+	LoadKey(passphrase string, params ...interface{}) (*cpt.Xtd, error)
 }
