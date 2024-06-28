@@ -1,0 +1,129 @@
+package md
+
+import (
+	"crypto/sha256"
+	"encoding/binary"
+	"encoding/hex"
+	"hdwg3/_test"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
+
+func TestMaster(t *testing.T) {
+	seed, _ := hex.DecodeString("000102030405060708090a0b0c0d0e0f")
+	xtd, err := Master(seed, _test.KEY_SPEC)
+	assert.NoError(t, err)
+	assert.NotNil(t, xtd)
+	assert.Equal(t, 32, len(xtd.Key))
+	assert.Equal(t, 32, len(xtd.Cc))
+	sha256.New()
+}
+
+func TestSer(t *testing.T) {
+	seed, _ := hex.DecodeString("000102030405060708090a0b0c0d0e0f")
+	xtd, _ := Master(seed, _test.KEY_SPEC)
+	ser, err := xtd.Ser()
+	assert.NoError(t, err)
+	assert.NotEmpty(t, ser)
+}
+
+func TestChild(t *testing.T) {
+	seed, _ := hex.DecodeString("000102030405060708090a0b0c0d0e0f")
+	xtd, _ := Master(seed, _test.KEY_SPEC)
+
+	ck, err := xtd.Child(0)
+	assert.NoError(t, err)
+	assert.NotNil(t, ck)
+	assert.Equal(t, xtd.Dep+1, ck.Dep)
+	assert.Equal(t, uint32(0), ck.Chn)
+}
+
+func TestFingerprint(t *testing.T) {
+	seed, _ := hex.DecodeString("000102030405060708090a0b0c0d0e0f")
+	xtd, _ := Master(seed, _test.KEY_SPEC)
+	fin := xtd.Fingerprint()
+
+	pub, _ := xtd.Pub()
+	h := sha256.New()
+	h.Write(pub.SerializeCompressed())
+	fingerprint := h.Sum(nil)[:4]
+	actualFingerprint := binary.BigEndian.Uint32(fingerprint)
+
+	assert.Equal(t, fin, actualFingerprint)
+}
+
+func TestCanDerive(t *testing.T) {
+	seed, _ := hex.DecodeString("000102030405060708090a0b0c0d0e0f")
+	xtd, _ := Master(seed, _test.KEY_SPEC)
+	err := xtd.canDerive(0)
+	assert.NoError(t, err)
+
+	err = xtd.canDerive(0x80000000)
+	assert.NoError(t, err)
+
+	xtd.IsPvt = false
+	err = xtd.canDerive(0x80000000)
+
+	assert.Error(t, err)
+}
+
+func TestPd(t *testing.T) {
+	seed, _ := hex.DecodeString("000102030405060708090a0b0c0d0e0f")
+	xtd, _ := Master(seed, _test.KEY_SPEC)
+
+	data, err := xtd.pd(0)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, data)
+}
+
+func TestHmac(t *testing.T) {
+	seed, _ := hex.DecodeString("000102030405060708090a0b0c0d0e0f")
+	xtd, _ := Master(seed, _test.KEY_SPEC)
+
+	data, _ := xtd.pd(0)
+	hmac := xtd.hmac(data)
+	assert.NotEmpty(t, hmac)
+}
+
+func TestCk(t *testing.T) {
+	seed, _ := hex.DecodeString("000102030405060708090a0b0c0d0e0f")
+	xtd, _ := Master(seed, _test.KEY_SPEC)
+
+	data, _ := xtd.pd(0)
+	hmac := xtd.hmac(data)
+	ck, err := xtd.ck(hmac)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, ck)
+}
+
+func TestCek(t *testing.T) {
+	seed, _ := hex.DecodeString("000102030405060708090a0b0c0d0e0f")
+	xtd, _ := Master(seed, _test.KEY_SPEC)
+
+	data, _ := xtd.pd(0)
+	hmac := xtd.hmac(data)
+	ck, _ := xtd.ck(hmac)
+	cek := xtd.cek(ck, hmac[32:], 0)
+	assert.NotNil(t, cek)
+	assert.Equal(t, xtd.Dep+1, cek.Dep)
+	assert.Equal(t, xtd.Fingerprint(), cek.Fin)
+	assert.Equal(t, uint32(0), cek.Chn)
+}
+
+func TestSkd(t *testing.T) {
+	seed, _ := hex.DecodeString("000102030405060708090a0b0c0d0e0f")
+	xtd, _ := Master(seed, _test.KEY_SPEC)
+
+	skd, err := xtd.skd()
+	assert.NoError(t, err)
+	assert.NotEmpty(t, skd)
+}
+
+func TestSvn(t *testing.T) {
+	seed, _ := hex.DecodeString("000102030405060708090a0b0c0d0e0f")
+	xtd, _ := Master(seed, _test.KEY_SPEC)
+
+	_v := xtd.svn()
+	assert.NotEmpty(t, _v)
+}

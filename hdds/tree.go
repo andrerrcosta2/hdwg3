@@ -1,10 +1,18 @@
 package hdds
 
 import (
+	"crypto/sha256"
 	"fmt"
+	"github.com/btcsuite/btcd/btcec"
+	"github.com/btcsuite/btcutil/base58"
+	"github.com/btcsuite/btcutil/hdkeychain"
+	"golang.org/x/crypto/ripemd160"
 	"hdwg3/io"
 	"hdwg3/md"
+	"hdwg3/pck"
 	"os"
+	"strconv"
+	"strings"
 	"sync"
 )
 
@@ -31,20 +39,55 @@ func (tree *HTree) Child(i uint32) (*HTree, error) {
 	tree.mtx.Lock()
 	defer tree.mtx.Unlock()
 
-	if child, exists := tree.Chn[i]; exists {
-		return child, nil
+	if c, exists := tree.Chn[i]; exists {
+		return c, nil
 	}
 
-	filename := fmt.Sprintf("key-%d-%d.dat", tree.Key.Dep+1, i)
-	childKey, err := tree.IOS.LoadKey(filename, tree.Pass)
+	ck, err := tree.IOS.LoadKey(tree.Pass, tree.Key.Dep+1, i)
 	if err == nil {
-		child := NewHTree(childKey, tree.IOS, tree.Fn, tree.Pass)
-		tree.Chn[i] = child
-		return child, nil
+		c := NewHTree(ck, tree.IOS, tree.Fn, tree.Pass)
+		tree.Chn[i] = c
+		return c, nil
 	}
 
 	if os.IsNotExist(err) {
 		return nil, fmt.Errorf("child key not found at depth %d, index %d", tree.Key.Dep+1, i)
+	}
+
+	return nil, err
+}
+
+func (tree *HTree) CreateChild(i uint32) (*HTree, error) {
+	tree.mtx.Lock()
+	defer tree.mtx.Unlock()
+
+	if c, exists := tree.Chn[i]; exists {
+		return c, nil
+	}
+
+	ck, err := tree.IOS.LoadKey(tree.Pass, tree.Key.Dep+1, i)
+	if err == nil {
+		child := NewHTree(ck, tree.IOS, tree.Fn, tree.Pass)
+		tree.Chn[i] = child
+		return child, nil
+	}
+
+	// If the c key doesn't exist in storage, generate a new one
+	if os.IsNotExist(err) {
+		ck, err = tree.Key.Child(i)
+		if err != nil {
+			return nil, fmt.Errorf("failed to generate c key: %v", err)
+		}
+
+		// Store the newly generated c key
+		err = tree.IOS.StoreKey(tree.Pass, ck, tree.Key.Dep+1, i)
+		if err != nil {
+			return nil, fmt.Errorf("failed to store c key: %v", err)
+		}
+
+		child := NewHTree(ck, tree.IOS, tree.Fn, tree.Pass)
+		tree.Chn[i] = child
+		return child, nil
 	}
 
 	return nil, err
@@ -62,4 +105,55 @@ func (tree *HTree) KeyAt(path []uint32) (*HTree, error) {
 	}
 
 	return current, nil
+}
+
+func (tree *HTree) Addr(path string) (string, error) {
+	ck, err := tree.kd(path)
+
+	if err != nil {
+		return "", err
+	}
+
+	_, pub := btcec.PrivKeyFromBytes(btcec.S256(), ck.Key)
+
+	// A = RIPEMD160(SHA235(K))
+	s256h := pck.HSP(sha256.New, pub.SerializeCompressed())
+	pkh := pck.HSP(ripemd160.New, s256h)
+
+	_v := append([]byte{0x00}, pkh...)
+
+	h1 := pck.HSP(sha256.New, _v)
+	h2 := pck.HSP(sha256.New, h1)
+
+	return base58.Encode(append(_v, h2[:4]...)), nil
+}
+
+func (tree *HTree) kd(path string) (*md.Xtd, error) {
+	k := tree.Key
+	cs := strings.Split(path, "/")[1:]
+
+	for _, c := range cs {
+		var i uint32
+		if strings.HasSuffix(c, "'") {
+			// Hardened
+			j, err := strconv.Atoi(strings.TrimSuffix(c, "'"))
+			if err != nil {
+				return nil, err
+			}
+			i = uint32(j) + hdkeychain.HardenedKeyStart
+		} else {
+			j, err := strconv.Atoi(c)
+			if err != nil {
+				return nil, err
+			}
+			i = uint32(j)
+		}
+
+		ck, err := k.Child(i)
+		if err != nil {
+			return nil, err
+		}
+		k = ck
+	}
+	return k, nil
 }

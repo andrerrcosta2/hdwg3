@@ -1,38 +1,49 @@
 package io
 
 import (
-	"fmt"
+	"hdwg3/io/fioss"
 	"hdwg3/md"
 	"hdwg3/pck"
 	"os"
 )
 
-type FileKeyStore struct{}
+type FileKeyStore struct {
+	sem fioss.Fioss
+}
 
-func (f *FileKeyStore) StoreKey(key *md.Xtd, passphrase string) error {
-	filename := fmt.Sprintf("key-%d-%d.dat", key.Dep, key.ChildNumber)
+func (f *FileKeyStore) StoreKey(passphrase string, key *md.Xtd, args ...interface{}) error {
+	fn, err := f.sem.StoreQuery(args)
+	if err != nil {
+		return err
+	}
 
 	data, err := pck.SerK(key)
 	if err != nil {
 		return err
 	}
 
-	encryptedData, err := pck.Encr(data, passphrase)
+	enc, err := pck.Encr(data, passphrase)
 	if err != nil {
 		return err
 	}
 
-	return os.WriteFile(filename, encryptedData, 0644)
+	return os.WriteFile(fn, enc, 0644)
 }
 
-func (f *FileKeyStore) LoadKey(filename, passphrase string) (*md.Xtd, error) {
-	encryptedData, err := os.ReadFile(filename)
+func (f *FileKeyStore) LoadKey(passphrase string, args ...interface{}) (*md.Xtd, error) {
+	filename, err := f.sem.LoadQuery(args)
 	if err != nil {
 		return nil, err
 	}
 
-	data, err := pck.Decr(encryptedData, passphrase)
+	enc, err := os.ReadFile(filename)
 	if err != nil {
+		return nil, err
+	}
+
+	data, err := pck.Decr(enc, passphrase)
+	if err != nil {
+
 		return nil, err
 	}
 

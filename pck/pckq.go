@@ -4,6 +4,7 @@ import (
 	"crypto/hmac"
 	"crypto/sha512"
 	"golang.org/x/crypto/pbkdf2"
+	"hash"
 	"hdwg3/md"
 )
 
@@ -15,6 +16,12 @@ func MK(seed []byte, keySpec string) ([]byte, []byte) {
 	k := []byte(keySpec)
 	I := hmacSHA512(k, seed)
 	return I[:32], I[32:]
+}
+
+func HSP(h func() hash.Hash, d []byte) []byte {
+	hr := h()
+	hr.Write(d)
+	return hr.Sum(nil)
 }
 
 func hmacSHA512(key, data []byte) []byte {
