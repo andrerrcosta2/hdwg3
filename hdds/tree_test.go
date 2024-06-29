@@ -60,8 +60,7 @@ func CreateChildTest(t *testing.T) {
 		index       uint32
 		expectedErr error
 	}{
-		{index: 0, expectedErr: nil}, // Replace with expected error or nil
-		// Add more test cases as needed
+		{index: 0, expectedErr: nil},
 	}
 
 	for _, tc := range testCases {
@@ -69,8 +68,6 @@ func CreateChildTest(t *testing.T) {
 		if !errors.Is(err, tc.expectedErr) {
 			t.Errorf("CreateChild(%d) returned unexpected error: got %v, want %v", tc.index, err, tc.expectedErr)
 		}
-
-		// Optionally, add assertions to verify child struct properties or behavior
 	}
 }
 
@@ -80,8 +77,7 @@ func KeyAtTest(t *testing.T) {
 		path        []uint32
 		expectedErr error
 	}{
-		{path: []uint32{0, 1, 2}, expectedErr: nil}, // Replace with expected error or nil
-		// Add more test cases as needed
+		{path: []uint32{0, 1, 2}, expectedErr: nil},
 	}
 
 	for _, tc := range testCases {
@@ -89,8 +85,6 @@ func KeyAtTest(t *testing.T) {
 		if !errors.Is(err, tc.expectedErr) {
 			t.Errorf("KeyAt(%v) returned unexpected error: got %v, want %v", tc.path, err, tc.expectedErr)
 		}
-
-		// Optionally, add assertions to verify child struct properties or behavior
 	}
 }
 
@@ -120,8 +114,7 @@ func KdTest(t *testing.T) {
 		expectedXtd *cpt.Xtd
 		expectedErr error
 	}{
-		{path: "m/44'/0'/0'/0/0", expectedXtd: &cpt.Xtd{}, expectedErr: nil}, // Replace with expected Xtd and error
-		// Add more test cases as needed
+		{path: "m/44'/0'/0'/0/0", expectedXtd: &cpt.Xtd{}, expectedErr: nil},
 	}
 
 	for _, tc := range testCases {
