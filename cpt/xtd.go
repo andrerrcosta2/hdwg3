@@ -1,4 +1,4 @@
-// Created by André R R Costa
+// Created by André R R Costa ** github.com/andrerrcosta2
 // File: xtd.go
 // Date:
 // Description:
