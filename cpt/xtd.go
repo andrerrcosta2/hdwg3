@@ -119,7 +119,7 @@ func (x *Xtd) canDerive(i uint32) error {
 func (x *Xtd) pd(i uint32) ([]byte, error) {
 	var dat []byte
 	if isHdn(i) {
-		dat = append(pfx.ADDR_V, x.Key...)
+		dat = append([]byte{0x00}, x.Key...)
 	} else {
 		pub, err := x.Pub()
 		if err != nil {
