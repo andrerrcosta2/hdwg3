@@ -17,6 +17,9 @@ type FileKeyStore struct {
 }
 
 func (f *FileKeyStore) StoreKey(passphrase string, key *cpt.Xtd, args ...interface{}) error {
+	f.mtx.Lock()
+	defer f.mtx.Unlock()
+
 	fn, err := f.sem.StoreQuery(args)
 	if err != nil {
 		return err
@@ -36,9 +39,6 @@ func (f *FileKeyStore) StoreKey(passphrase string, key *cpt.Xtd, args ...interfa
 }
 
 func (f *FileKeyStore) LoadKey(passphrase string, args ...interface{}) (*cpt.Xtd, error) {
-	f.mtx.Lock()
-	defer f.mtx.Unlock()
-
 	filename, err := f.sem.LoadQuery(args)
 	if err != nil {
 		return nil, err
