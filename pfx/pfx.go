@@ -1,8 +1,6 @@
-// Created by André R R Costa ** github.com/andrerrcosta2
-// File: pfx.go
-// Date:
-// Description:
-// --------------------------------------------------------------
+/*
+	André R R Costa ** github.com/andrerrcosta2
+*/
 
 package pfx
 
