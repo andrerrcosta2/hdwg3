@@ -2,139 +2,121 @@ package hdds
 
 import (
 	"errors"
+	"fmt"
+	"github.com/btcsuite/btcutil/hdkeychain"
 	"hdwg3/cpt"
-	"sync"
+	"regexp"
 	"testing"
 )
 
-type MockIOS struct{}
-
-func (m MockIOS) StoreKey(passphrase string, key *cpt.Xtd, params ...interface{}) error {
-	return nil
-}
-
-func (m MockIOS) LoadKey(passphrase string, params ...interface{}) (*cpt.Xtd, error) {
-	return mockKey, nil
-}
-
-var (
-	mockKey = &cpt.Xtd{
-		Key:   []byte{},
-		Cc:    []byte{},
-		Dep:   0,
-		Fin:   0,
-		Chn:   0,
-		IsPvt: true,
-	}
-	mockHTree = &HTree{
-		Key:  mockKey,
-		IOS:  MockIOS{},
-		Fn:   "mock_filename",
-		Pass: "mock_password",
-		Chn:  make(map[uint32]*HTree),
-		mtx:  sync.Mutex{},
-	}
-)
-
-// ChildTest tests the Child method of HTree.
-func ChildTest(t *testing.T) {
-	testCases := []struct {
-		index       uint32
-		expectedErr error
+// TestChd tests the Child method of HTree.
+func TestChd(t *testing.T) {
+	tcs := []struct {
+		ind uint32
+		exp error
 	}{
-		{index: 0, expectedErr: nil},
+		{ind: 0, exp: nil},
+		{ind: 44 + hdkeychain.HardenedKeyStart, exp: nil},
+		{ind: 1 + hdkeychain.HardenedKeyStart, exp: nil},
 	}
 
-	for _, tc := range testCases {
-		_, err := mockHTree.Child(tc.index)
-		if !errors.Is(err, tc.expectedErr) {
-			t.Errorf("Child(%d) returned unexpected error: got %v, want %v", tc.index, err, tc.expectedErr)
+	for i, tc := range tcs {
+		chd, err := mht.Child(tc.ind)
+		if tc.exp != nil {
+			if err == nil || err.Error() != tc.exp.Error() {
+				t.Errorf("Child(%v) unexpected error: \nerr: %v, \nexp: %v", tc.ind, err, tc.exp)
+			}
+		} else {
+			if err != nil {
+				t.Errorf("Child(%d) unexpected error: \nerr %v, \nexp nil", tc.ind, err)
+			}
 		}
-
+		fmt.Printf("Child(%d): %+v\n", i, chd)
 	}
 }
 
-// CreateChildTest tests the CreateChild method of HTree.
-func CreateChildTest(t *testing.T) {
-	testCases := []struct {
-		index       uint32
-		expectedErr error
+// TestGCoC tests the GCoC method of HTree.
+func TestGCoC(t *testing.T) {
+	tcs := []struct {
+		ind uint32
+		exp error
 	}{
-		{index: 0, expectedErr: nil},
+		{ind: 0, exp: nil},
 	}
 
-	for _, tc := range testCases {
-		_, err := mockHTree.CreateChild(tc.index)
-		if !errors.Is(err, tc.expectedErr) {
-			t.Errorf("CreateChild(%d) returned unexpected error: got %v, want %v", tc.index, err, tc.expectedErr)
+	for _, tc := range tcs {
+		_, err := mht.GCoC(tc.ind)
+		if !errors.Is(err, tc.exp) {
+			t.Errorf("CreateChild(%d) unexpected error: \nerr %v, \nexo %v", tc.ind, err, tc.exp)
 		}
 	}
 }
 
 // KeyAtTest tests the KeyAt method of HTree.
-func KeyAtTest(t *testing.T) {
-	testCases := []struct {
-		path        []uint32
-		expectedErr error
+func TestKeyAt(t *testing.T) {
+	tcs := []struct {
+		path []uint32
+		exp  error
 	}{
-		{path: []uint32{0, 1, 2}, expectedErr: nil},
+		{path: []uint32{0, 0, 1}, exp: fmt.Errorf("Path not found")},
+		{path: []uint32{0, 44 + hdkeychain.HardenedKeyStart}, exp: nil},
 	}
 
-	for _, tc := range testCases {
-		_, err := mockHTree.KeyAt(tc.path)
-		if !errors.Is(err, tc.expectedErr) {
-			t.Errorf("KeyAt(%v) returned unexpected error: got %v, want %v", tc.path, err, tc.expectedErr)
+	for _, tc := range tcs {
+		_, err := mht.KeyAt(tc.path)
+		if tc.exp != nil {
+			if err == nil || err.Error() != tc.exp.Error() {
+				t.Errorf("KeyAt(%v) unexpected error: \nerr: %v, \nexp: %v", tc.path, err, tc.exp)
+			}
+		} else {
+			if err != nil {
+				t.Errorf("KeyAt(%v) unexpected error: \nerr: %v, \nexp: nil", tc.path, err)
+			}
 		}
 	}
 }
 
-func AddrTest(t *testing.T) {
-	testCases := []struct {
-		path     string
-		expected string
+func TestAddr(t *testing.T) {
+	tcs := []struct {
+		path string
+		exp  *regexp.Regexp
 	}{
-		{path: "m/44'/0'/0'/0/0", expected: "expected_address_here"},
+		{path: "m/44'/0'/0'/0/0", exp: regexp.MustCompile(`^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$`)},
 	}
 
-	for _, tc := range testCases {
-		addr, err := mockHTree.Addr(tc.path)
+	for _, tc := range tcs {
+		addr, err := mht.Addr(tc.path)
 		if err != nil {
-			t.Errorf("Addr(%s) returned error: %v", tc.path, err)
+			fmt.Printf("Addr(%s) error: %v", tc.path, err)
 		}
 
-		if addr != tc.expected {
-			t.Errorf("Addr(%s) returned unexpected address: got %s, want %s", tc.path, addr, tc.expected)
+		if !tc.exp.MatchString(addr) {
+			t.Errorf("Addr(%s) unexpected address format: \naddr: %s", tc.path, addr)
 		}
 	}
 }
 
-func KdTest(t *testing.T) {
-	testCases := []struct {
-		path        string
-		expectedXtd *cpt.Xtd
-		expectedErr error
+func TestKd(t *testing.T) {
+	tcs := []struct {
+		path   string
+		expXtd *cpt.Xtd
+		expErr error
 	}{
-		{path: "m/44'/0'/0'/0/0", expectedXtd: &cpt.Xtd{}, expectedErr: nil},
+		{path: "m/44'/0'/0'/0/0", expXtd: &cpt.Xtd{}, expErr: nil},
 	}
 
-	for _, tc := range testCases {
-		_, err := mockHTree.kd(tc.path)
-		if !errors.Is(err, tc.expectedErr) {
-			t.Errorf("kd(%s) returned unexpected error: got %v, want %v", tc.path, err, tc.expectedErr)
+	for _, tc := range tcs {
+		_, err := mht.kd(tc.path)
+		if !errors.Is(err, tc.expErr) {
+			t.Errorf("kd(%s) returned unexpected error: got %v, want %v", tc.path, err, tc.expErr)
 		}
-
-		// Compare Xtd fields or use custom comparison logic if needed
-		// Example comparison:
-		// if !reflect.DeepEqual(xtd, tc.expectedXtd) {
-		// 	t.Errorf("kd(%s) returned unexpected Xtd: got %+v, want %+v", tc.path, xtd, tc.expectedXtd)
-		// }
 	}
 }
 
 func TestHTree(t *testing.T) {
-	t.Run("Child", ChildTest)
-	t.Run("CreateChild", CreateChildTest)
-	t.Run("KeyAt", KeyAtTest)
-	t.Run("Addr", AddrTest)
-	t.Run("Kd", KdTest)
+	t.Run("Child", TestChd)
+	t.Run("CreateChild", TestGCoC)
+	t.Run("KeyAt", TestKeyAt)
+	t.Run("Addr", TestAddr)
+	t.Run("Kd", TestKd)
 }

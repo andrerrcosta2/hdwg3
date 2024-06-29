@@ -40,7 +40,7 @@ func TestChild(t *testing.T) {
 	assert.Equal(t, uint32(0), ck.Chn)
 }
 
-func TestFingerprint(t *testing.T) {
+func TestFpt(t *testing.T) {
 	seed, _ := hex.DecodeString("000102030405060708090a0b0c0d0e0f")
 	xtd, _ := Master(seed, _test.KEY_SPEC)
 	fin := xtd.Fpt()
@@ -48,13 +48,12 @@ func TestFingerprint(t *testing.T) {
 	pub, _ := xtd.Pub()
 	h := sha256.New()
 	h.Write(pub.SerializeCompressed())
-	fingerprint := h.Sum(nil)[:4]
-	actualFingerprint := binary.BigEndian.Uint32(fingerprint)
+	res := binary.BigEndian.Uint32(h.Sum(nil)[:4])
 
-	assert.Equal(t, fin, actualFingerprint)
+	assert.Equal(t, fin, res)
 }
 
-func TestCanDerive(t *testing.T) {
+func TestCD(t *testing.T) {
 	seed, _ := hex.DecodeString("000102030405060708090a0b0c0d0e0f")
 	xtd, _ := Master(seed, _test.KEY_SPEC)
 	err := xtd.canDerive(0)
@@ -73,17 +72,17 @@ func TestPd(t *testing.T) {
 	seed, _ := hex.DecodeString("000102030405060708090a0b0c0d0e0f")
 	xtd, _ := Master(seed, _test.KEY_SPEC)
 
-	data, err := xtd.pd(0)
+	dat, err := xtd.pd(0)
 	assert.NoError(t, err)
-	assert.NotEmpty(t, data)
+	assert.NotEmpty(t, dat)
 }
 
 func TestCk(t *testing.T) {
 	seed, _ := hex.DecodeString("000102030405060708090a0b0c0d0e0f")
 	xtd, _ := Master(seed, _test.KEY_SPEC)
 
-	data, _ := xtd.pd(0)
-	hmac := pck.HmacSHA512(xtd.Cc, data)
+	dat, _ := xtd.pd(0)
+	hmac := pck.HmacSHA512(xtd.Cc, dat)
 	ck, err := xtd.ck(hmac)
 	assert.NoError(t, err)
 	assert.NotEmpty(t, ck)
@@ -93,8 +92,8 @@ func TestCek(t *testing.T) {
 	seed, _ := hex.DecodeString("000102030405060708090a0b0c0d0e0f")
 	xtd, _ := Master(seed, _test.KEY_SPEC)
 
-	data, _ := xtd.pd(0)
-	hmac := pck.HmacSHA512(xtd.Cc, data)
+	dat, _ := xtd.pd(0)
+	hmac := pck.HmacSHA512(xtd.Cc, dat)
 	ck, _ := xtd.ck(hmac)
 	cek := xtd.cek(ck, hmac[32:], 0)
 	assert.NotNil(t, cek)

@@ -104,7 +104,7 @@ func (x *Xtd) Fpt() uint32 {
 
 func (x *Xtd) canDerive(i uint32) error {
 	if isHdn(i) && !x.IsPvt {
-		return errors.New("cannot derive hardened key from public key")
+		return errors.New("cannot derive hardened tdp from public tdp")
 	}
 	return nil
 }
@@ -132,7 +132,7 @@ func (x *Xtd) ck(I []byte) ([]byte, error) {
 	il := new(big.Int).SetBytes(I[:32])
 	il = il.Mod(il, btcec.S256().N)
 	if il.Sign() == 0 {
-		return nil, errors.New("invalid child key")
+		return nil, errors.New("invalid child tdp")
 	}
 
 	childKey := new(big.Int).Add(new(big.Int).SetBytes(x.Key), il)

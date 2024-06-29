@@ -62,7 +62,7 @@ func TestEncAndDec(t *testing.T) {
 
 func TestEncAndDecWithFixedPassphrase(t *testing.T) {
 	data := []byte("this is a test data")
-	pass := "thisisafixedpassphrase"
+	pass := "thisisafixedpassphrase1234567890"
 
 	enc, err := Encr(data, pass)
 	if err != nil {

@@ -50,7 +50,7 @@ func TestDMaK(t *testing.T) {
 		mk16 := hex.EncodeToString(mk)
 		cc16 := hex.EncodeToString(cc)
 		if mk16 != test.expMK {
-			t.Errorf("Expected master key %s, got %s", test.expMK, mk16)
+			t.Errorf("Expected master tdp %s, got %s", test.expMK, mk16)
 		}
 		if cc16 != test.expCC {
 			t.Errorf("Expected chain code %s, got %s", test.expCC, cc16)

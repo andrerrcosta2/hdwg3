@@ -52,13 +52,13 @@ func (tree *HTree) Child(i uint32) (*HTree, error) {
 	}
 
 	if os.IsNotExist(err) {
-		return nil, fmt.Errorf("child key not found at depth %d, index %d", tree.Key.Dep+1, i)
+		return nil, fmt.Errorf("child tdp not found at depth %d, ind %d", tree.Key.Dep+1, i)
 	}
 
 	return nil, err
 }
 
-func (tree *HTree) CreateChild(i uint32) (*HTree, error) {
+func (tree *HTree) GCoC(i uint32) (*HTree, error) {
 	tree.mtx.Lock()
 	defer tree.mtx.Unlock()
 
@@ -76,12 +76,12 @@ func (tree *HTree) CreateChild(i uint32) (*HTree, error) {
 	if os.IsNotExist(err) {
 		ck, err = tree.Key.Child(i)
 		if err != nil {
-			return nil, fmt.Errorf("failed to generate c key: %v", err)
+			return nil, fmt.Errorf("failed to generate c tdp: %v", err)
 		}
 
 		err = tree.IOS.StoreKey(tree.Pass, ck, tree.Key.Dep+1, i)
 		if err != nil {
-			return nil, fmt.Errorf("failed to store c key: %v", err)
+			return nil, fmt.Errorf("failed to store c tdp: %v", err)
 		}
 
 		chi := NewHTree(ck, tree.IOS, tree.Fn, tree.Pass)

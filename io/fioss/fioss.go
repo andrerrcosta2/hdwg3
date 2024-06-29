@@ -15,7 +15,7 @@ func (f Fioss) StoreQuery(args ...interface{}) (string, error) {
 		return "", fmt.Errorf("invalid parameters")
 	}
 
-	return fmt.Sprintf("key-%d-%d.dat", dep, chn), nil
+	return fmt.Sprintf("tdp-%d-%d.dat", dep, chn), nil
 }
 
 func (f Fioss) LoadQuery(args ...interface{}) (string, error) {
@@ -28,7 +28,7 @@ func (f Fioss) LoadQuery(args ...interface{}) (string, error) {
 		return "", fmt.Errorf("invalid parameters")
 	}
 
-	return fmt.Sprintf("key-%d-%d.dat", dep, chn), nil
+	return fmt.Sprintf("tdp-%d-%d.dat", dep, chn), nil
 }
 
 func New() Fioss {
