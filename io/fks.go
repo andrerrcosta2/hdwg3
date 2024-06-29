@@ -8,10 +8,12 @@ import (
 	"hdwg3/cpt"
 	"hdwg3/io/fioss"
 	"os"
+	"sync"
 )
 
 type FileKeyStore struct {
 	sem fioss.Fioss
+	mtx sync.Mutex
 }
 
 func (f *FileKeyStore) StoreKey(passphrase string, key *cpt.Xtd, args ...interface{}) error {
@@ -34,6 +36,9 @@ func (f *FileKeyStore) StoreKey(passphrase string, key *cpt.Xtd, args ...interfa
 }
 
 func (f *FileKeyStore) LoadKey(passphrase string, args ...interface{}) (*cpt.Xtd, error) {
+	f.mtx.Lock()
+	defer f.mtx.Unlock()
+
 	filename, err := f.sem.LoadQuery(args)
 	if err != nil {
 		return nil, err
