@@ -2,15 +2,23 @@ package hdds
 
 import (
 	"errors"
-	"hdwg3/_test"
 	"hdwg3/cpt"
 	"sync"
 	"testing"
 )
 
-// ChildTest tests the Child method of HTree.
-func ChildTest(t *testing.T) {
-	mockKey := &cpt.Xtd{
+type MockIOS struct{}
+
+func (m MockIOS) StoreKey(passphrase string, key *cpt.Xtd, params ...interface{}) error {
+	return nil
+}
+
+func (m MockIOS) LoadKey(passphrase string, params ...interface{}) (*cpt.Xtd, error) {
+	return mockKey, nil
+}
+
+var (
+	mockKey = &cpt.Xtd{
 		Key:   []byte{},
 		Cc:    []byte{},
 		Dep:   0,
@@ -18,16 +26,18 @@ func ChildTest(t *testing.T) {
 		Chn:   0,
 		IsPvt: true,
 	}
-	mockHTree := &HTree{
+	mockHTree = &HTree{
 		Key:  mockKey,
-		IOS:  _test.MockIOS{},
+		IOS:  MockIOS{},
 		Fn:   "mock_filename",
 		Pass: "mock_password",
 		Chn:  make(map[uint32]*HTree),
 		mtx:  sync.Mutex{},
 	}
+)
 
-	// Test cases
+// ChildTest tests the Child method of HTree.
+func ChildTest(t *testing.T) {
 	testCases := []struct {
 		index       uint32
 		expectedErr error
@@ -46,25 +56,6 @@ func ChildTest(t *testing.T) {
 
 // CreateChildTest tests the CreateChild method of HTree.
 func CreateChildTest(t *testing.T) {
-	// Mock setup
-	mockKey := &cpt.Xtd{
-		Key:   []byte{ /* Mock key bytes */ },
-		Cc:    []byte{ /* Mock chain code bytes */ },
-		Dep:   0,    // Mock depth
-		Fin:   0,    // Mock fingerprint
-		Chn:   0,    // Mock child index
-		IsPvt: true, // Mock private key status
-	}
-	mockHTree := &HTree{
-		Key:  mockKey,
-		IOS:  _test.MockIOS{},
-		Fn:   "mock_filename",
-		Pass: "mock_password",
-		Chn:  make(map[uint32]*HTree),
-		mtx:  sync.Mutex{},
-	}
-
-	// Test cases
 	testCases := []struct {
 		index       uint32
 		expectedErr error
@@ -85,25 +76,6 @@ func CreateChildTest(t *testing.T) {
 
 // KeyAtTest tests the KeyAt method of HTree.
 func KeyAtTest(t *testing.T) {
-	// Mock setup
-	mockKey := &cpt.Xtd{
-		Key:   []byte{ /* Mock key bytes */ },
-		Cc:    []byte{ /* Mock chain code bytes */ },
-		Dep:   0,    // Mock depth
-		Fin:   0,    // Mock fingerprint
-		Chn:   0,    // Mock child index
-		IsPvt: true, // Mock private key status
-	}
-	mockHTree := &HTree{
-		Key:  mockKey,
-		IOS:  _test.MockIOS{},
-		Fn:   "mock_filename",
-		Pass: "mock_password",
-		Chn:  make(map[uint32]*HTree),
-		mtx:  sync.Mutex{},
-	}
-
-	// Test cases
 	testCases := []struct {
 		path        []uint32
 		expectedErr error
@@ -123,23 +95,6 @@ func KeyAtTest(t *testing.T) {
 }
 
 func AddrTest(t *testing.T) {
-
-	mockKey := &cpt.Xtd{
-		Key:   []byte{},
-		Cc:    []byte{},
-		Dep:   0,
-		Fin:   0,
-		Chn:   0,
-		IsPvt: true,
-	}
-	mockHTree := &HTree{
-		Key:  mockKey,
-		IOS:  _test.MockIOS{},
-		Fn:   "mock_filename",
-		Pass: "mock_password",
-		Chn:  make(map[uint32]*HTree),
-	}
-
 	testCases := []struct {
 		path     string
 		expected string
@@ -160,24 +115,6 @@ func AddrTest(t *testing.T) {
 }
 
 func KdTest(t *testing.T) {
-	// Mock setup
-	mockKey := &cpt.Xtd{
-		Key:   []byte{ /* Mock key bytes */ },
-		Cc:    []byte{ /* Mock chain code bytes */ },
-		Dep:   0,    // Mock depth
-		Fin:   0,    // Mock fingerprint
-		Chn:   0,    // Mock child index
-		IsPvt: true, // Mock private key status
-	}
-	mockHTree := &HTree{
-		Key:  mockKey,
-		IOS:  _test.MockIOS{}, // Mock implementation of io.IOS
-		Fn:   "mock_filename",
-		Pass: "mock_password",
-		Chn:  make(map[uint32]*HTree),
-	}
-
-	// Test cases
 	testCases := []struct {
 		path        string
 		expectedXtd *cpt.Xtd
