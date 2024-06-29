@@ -15,6 +15,7 @@ import (
 	"github.com/btcsuite/btcutil/base58"
 	"github.com/btcsuite/btcutil/hdkeychain"
 	"hdwg3/pck"
+	"hdwg3/pfx"
 	"math/big"
 )
 
@@ -118,7 +119,7 @@ func (x *Xtd) canDerive(i uint32) error {
 func (x *Xtd) pd(i uint32) ([]byte, error) {
 	var dat []byte
 	if isHdn(i) {
-		dat = append([]byte{0x00}, x.Key...)
+		dat = append(pfx.ADDR_V, x.Key...)
 	} else {
 		pub, err := x.Pub()
 		if err != nil {
@@ -134,16 +135,16 @@ func (x *Xtd) pd(i uint32) ([]byte, error) {
 	return dat, nil
 }
 
-func (x *Xtd) ck(I []byte) ([]byte, error) {
-	il := new(big.Int).SetBytes(I[:32])
+func (x *Xtd) ck(i []byte) ([]byte, error) {
+	il := new(big.Int).SetBytes(i[:32])
 	il = il.Mod(il, btcec.S256().N)
 	if il.Sign() == 0 {
-		return nil, errors.New("invalid child tdp")
+		return nil, errors.New("invalid child key")
 	}
 
-	childKey := new(big.Int).Add(new(big.Int).SetBytes(x.Key), il)
-	childKey = childKey.Mod(childKey, btcec.S256().N)
-	return childKey.Bytes(), nil
+	ck := new(big.Int).Add(new(big.Int).SetBytes(x.Key), il)
+	ck = ck.Mod(ck, btcec.S256().N)
+	return ck.Bytes(), nil
 }
 
 func (x *Xtd) cek(key, cc []byte, i uint32) *Xtd {
@@ -158,13 +159,10 @@ func (x *Xtd) cek(key, cc []byte, i uint32) *Xtd {
 }
 
 func (x *Xtd) svn() []byte {
-	var v []byte
 	if x.IsPvt {
-		v = []byte{0x04, 0x88, 0xAD, 0xE4}
-	} else {
-		v = []byte{0x04, 0x88, 0xB2, 0x1E}
+		return pfx.PVTK_V
 	}
-	return v
+	return pfx.PUBK_V
 }
 
 func (x *Xtd) skd() ([]byte, error) {
