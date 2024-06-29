@@ -13,7 +13,7 @@ import (
 )
 
 func Seed(m md.Mnmc, passphrase string) []byte {
-	return pbkdf2.Key(m.Byte(), []byte("mnm"+passphrase), 2048, 64, sha512.New)
+	return pbkdf2.Key(m.Byte(), []byte("mnemonic"+passphrase), 2048, 64, sha512.New)
 }
 
 func MK(seed []byte, keySpec string) ([]byte, []byte) {

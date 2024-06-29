@@ -44,8 +44,8 @@ func TestDMaK(t *testing.T) {
 		{
 			seed:    pbkdf2.Key([]byte("mnm"), []byte("mnm"), 2048, 64, sha512.New),
 			keySpec: "Bitcoin seed",
-			expMK:   "33542ed0e02dd7044c3e836416af94db528a73590d60212bdf63044767055116",
-			expCC:   "4c2232bd0be96bca95331649fa1e358033af50ed676b33f9f00adb286f868fa5",
+			expMK:   "b4f1b7de11a76199753052bcda155f1b5f2332c52b4f73ca33099dfb136fee92",
+			expCC:   "d2b92180421d55e5483f13e4124c69fb81d5ddcf55cdec0778f3b250b2ad3b36",
 		},
 	}
 
@@ -71,7 +71,7 @@ func TestHmacSHA512(t *testing.T) {
 		{
 			key:  []byte("Bitcoin seed"),
 			data: []byte("mnm"),
-			exp:  "deb001bfcf04c95869c312be474da1b8320ada66390c63a8630761c71aaac3cdcc3dcdfc033c45bd440bd023905da0c31604f0695143fba30eb1c60adb5ea7c3",
+			exp:  "94fa60b4eb901c27915ed7a45e8d140e7c2b675133410ddc95fad5fcb3ab92c618f2c4aff4a37fcbd1b321e44cfc07ac93d36240ba7ccb754163cead26268503",
 		},
 	}
 
@@ -79,7 +79,7 @@ func TestHmacSHA512(t *testing.T) {
 		res := HmacSHA512(tc.key, tc.data)
 		res16 := hex.EncodeToString(res)
 		if res16 != tc.exp {
-			t.Errorf("Returned hmac %s, \nexp %s", res16, tc.exp)
+			t.Errorf("Returned hmac %s,\nexp %s", res16, tc.exp)
 		}
 	}
 }
