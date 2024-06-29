@@ -1,3 +1,9 @@
+// Created by André R R Costa ** github.com/andrerrcosta2
+// File: pckq.go
+// Date:
+// Description:
+// --------------------------------------------------------------
+
 package pck
 
 import (
@@ -9,7 +15,7 @@ import (
 )
 
 func Seed(m md.Mnmc, passphrase string) []byte {
-	return pbkdf2.Key(m.Byte(), []byte("mnemonic"+passphrase), 2048, 64, sha512.New)
+	return pbkdf2.Key(m.Byte(), []byte("mnm"+passphrase), 2048, 64, sha512.New)
 }
 
 func MK(seed []byte, keySpec string) ([]byte, []byte) {

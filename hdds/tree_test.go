@@ -1,3 +1,9 @@
+// Created by André R R Costa ** github.com/andrerrcosta2
+// File: tree_test.go
+// Date:
+// Description:
+// --------------------------------------------------------------
+
 package hdds
 
 import (
@@ -9,7 +15,6 @@ import (
 	"testing"
 )
 
-// TestChd tests the Child method of HTree.
 func TestChd(t *testing.T) {
 	tcs := []struct {
 		ind uint32
@@ -35,7 +40,6 @@ func TestChd(t *testing.T) {
 	}
 }
 
-// TestGCoC tests the GCoC method of HTree.
 func TestGCoC(t *testing.T) {
 	tcs := []struct {
 		ind uint32
@@ -52,7 +56,6 @@ func TestGCoC(t *testing.T) {
 	}
 }
 
-// KeyAtTest tests the KeyAt method of HTree.
 func TestKeyAt(t *testing.T) {
 	tcs := []struct {
 		path []uint32

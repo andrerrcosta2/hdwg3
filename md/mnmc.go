@@ -1,3 +1,9 @@
+// Created by André R R Costa ** github.com/andrerrcosta2
+// File: mnmc.go
+// Date:
+// Description:
+// --------------------------------------------------------------
+
 package md
 
 import "strings"

@@ -1,3 +1,9 @@
+// Created by André R R Costa
+// File: stos_test.go
+// Date:
+// Description:
+// --------------------------------------------------------------
+
 package cpt
 
 import (

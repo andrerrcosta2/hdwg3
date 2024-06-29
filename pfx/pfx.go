@@ -1,3 +1,9 @@
+// Created by André R R Costa ** github.com/andrerrcosta2
+// File: pfx.go
+// Date:
+// Description:
+// --------------------------------------------------------------
+
 package pfx
 
 var (

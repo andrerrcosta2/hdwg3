@@ -1,3 +1,9 @@
+// Created by André R R Costa
+// File: xtd.go
+// Date:
+// Description:
+// --------------------------------------------------------------
+
 package cpt
 
 import (
@@ -104,7 +110,7 @@ func (x *Xtd) Fpt() uint32 {
 
 func (x *Xtd) canDerive(i uint32) error {
 	if isHdn(i) && !x.IsPvt {
-		return errors.New("cannot derive hardened tdp from public tdp")
+		return errors.New("cannot derive hardened from public key")
 	}
 	return nil
 }

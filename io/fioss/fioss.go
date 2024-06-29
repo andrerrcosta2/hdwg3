@@ -1,3 +1,9 @@
+// Created by André R R Costa ** github.com/andrerrcosta2
+// File: fioss.go
+// Date:
+// Description:
+// --------------------------------------------------------------
+
 package fioss
 
 import "fmt"

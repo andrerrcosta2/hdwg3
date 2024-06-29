@@ -1,3 +1,9 @@
+// Created by André R R Costa ** github.com/andrerrcosta2
+// File: key.go
+// Date:
+// Description:
+// --------------------------------------------------------------
+
 package tdp
 
 import (
