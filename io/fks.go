@@ -6,13 +6,13 @@ package io
 
 import (
 	"hdwg3/cpt"
-	"hdwg3/io/fioss"
+	"hdwg3/io/sem"
 	"os"
 	"sync"
 )
 
 type FileKeyStore struct {
-	sem fioss.Fioss
+	sem sem.IOSS
 	mtx sync.Mutex
 }
 

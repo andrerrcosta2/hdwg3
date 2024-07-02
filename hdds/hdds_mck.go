@@ -77,6 +77,16 @@ func arc(p *HTree, i uint32) {
 	}
 }
 
+func arcrc(p *HTree, path ...uint32) {
+	c := p
+	for _, i := range path {
+		if _, ok := c.Chn[i]; !ok {
+			arc(c, i)
+		}
+		c = c.Chn[i]
+	}
+}
+
 func rck(dep byte, fin, chn uint32) *cpt.Xtd {
 	key, _ := tdp.Rand(ksz)
 	cc, _ := tdp.Rand(csz)
@@ -87,15 +97,5 @@ func rck(dep byte, fin, chn uint32) *cpt.Xtd {
 		Fin:   fin,
 		Chn:   chn,
 		IsPvt: true,
-	}
-}
-
-func arcrc(p *HTree, path ...uint32) {
-	c := p
-	for _, i := range path {
-		if _, ok := c.Chn[i]; !ok {
-			arc(c, i)
-		}
-		c = c.Chn[i]
 	}
 }

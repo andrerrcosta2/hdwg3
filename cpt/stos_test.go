@@ -1,6 +1,4 @@
-/*
-	André R R Costa ** github.com/andrerrcosta2
-*/
+// André R R Costa *** github.com/andrerrcosta2
 
 package cpt
 
