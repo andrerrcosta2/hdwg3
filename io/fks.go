@@ -5,8 +5,8 @@
 package io
 
 import (
-	"hdwg3/cpt"
-	"hdwg3/io/sem"
+	"github.com/andrerrcosta2/hdwg3/cpt"
+	"github.com/andrerrcosta2/hdwg3/io/sem"
 	"os"
 	"sync"
 )

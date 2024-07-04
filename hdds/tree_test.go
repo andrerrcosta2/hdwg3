@@ -7,8 +7,8 @@ package hdds
 import (
 	"errors"
 	"fmt"
+	"github.com/andrerrcosta2/hdwg3/cpt"
 	"github.com/btcsuite/btcutil/hdkeychain"
-	"hdwg3/cpt"
 	"regexp"
 	"testing"
 )

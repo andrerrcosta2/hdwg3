@@ -9,11 +9,11 @@ import (
 	"crypto/sha256"
 	"encoding/binary"
 	"errors"
-	"github.com/btcsuite/btcd/btcec"
+	"github.com/andrerrcosta2/hdwg3/pck"
+	"github.com/andrerrcosta2/hdwg3/pfx"
+	"github.com/btcsuite/btcd/btcec/v2"
 	"github.com/btcsuite/btcutil/base58"
 	"github.com/btcsuite/btcutil/hdkeychain"
-	"hdwg3/pck"
-	"hdwg3/pfx"
 	"math/big"
 )
 
@@ -97,7 +97,7 @@ func (x *Xtd) Child(i uint32) (*Xtd, error) {
 }
 
 func (x *Xtd) Pub() (*btcec.PublicKey, error) {
-	prk, _ := btcec.PrivKeyFromBytes(btcec.S256(), x.Key)
+	prk, _ := btcec.PrivKeyFromBytes(x.Key)
 	return prk.PubKey(), nil
 }
 

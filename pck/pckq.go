@@ -7,9 +7,9 @@ package pck
 import (
 	"crypto/hmac"
 	"crypto/sha512"
+	"github.com/andrerrcosta2/hdwg3/md"
 	"golang.org/x/crypto/pbkdf2"
 	"hash"
-	"hdwg3/md"
 )
 
 func Seed(m md.Mnmc, passphrase string) []byte {

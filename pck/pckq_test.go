@@ -7,8 +7,8 @@ package pck
 import (
 	"crypto/sha512"
 	"encoding/hex"
+	"github.com/andrerrcosta2/hdwg3/md"
 	"golang.org/x/crypto/pbkdf2"
-	"hdwg3/md"
 	"testing"
 )
 

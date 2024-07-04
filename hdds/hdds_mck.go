@@ -6,9 +6,9 @@ package hdds
 
 import (
 	"fmt"
+	"github.com/andrerrcosta2/hdwg3/cpt"
+	"github.com/andrerrcosta2/hdwg3/tdp"
 	"github.com/btcsuite/btcutil/hdkeychain"
-	"hdwg3/cpt"
-	"hdwg3/tdp"
 	"sync"
 	"testing"
 )

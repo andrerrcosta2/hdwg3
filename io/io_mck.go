@@ -1,9 +1,9 @@
 package io
 
 import (
+	"github.com/andrerrcosta2/hdwg3/cpt"
+	"github.com/andrerrcosta2/hdwg3/tdp"
 	"github.com/stretchr/testify/mock"
-	"hdwg3/cpt"
-	"hdwg3/tdp"
 )
 
 const (

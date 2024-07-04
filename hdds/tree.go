@@ -7,14 +7,14 @@ package hdds
 import (
 	"crypto/sha256"
 	"fmt"
-	"github.com/btcsuite/btcd/btcec"
+	"github.com/andrerrcosta2/hdwg3/cpt"
+	"github.com/andrerrcosta2/hdwg3/io"
+	"github.com/andrerrcosta2/hdwg3/pck"
+	"github.com/andrerrcosta2/hdwg3/pfx"
+	"github.com/btcsuite/btcd/btcec/v2"
 	"github.com/btcsuite/btcutil/base58"
 	"github.com/btcsuite/btcutil/hdkeychain"
 	"golang.org/x/crypto/ripemd160"
-	"hdwg3/cpt"
-	"hdwg3/io"
-	"hdwg3/pck"
-	"hdwg3/pfx"
 	"os"
 	"strconv"
 	"strings"
@@ -117,7 +117,7 @@ func (tree *HTree) Addr(path string) (string, error) {
 		return "", err
 	}
 
-	_, pub := btcec.PrivKeyFromBytes(btcec.S256(), ck.Key)
+	_, pub := btcec.PrivKeyFromBytes(ck.Key)
 
 	// A = RIPEMD160(SHA235(K))
 	s256h := pck.HSP(sha256.New, pub.SerializeCompressed())

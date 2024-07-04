@@ -5,8 +5,8 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"github.com/andrerrcosta2/hdwg3/cpt"
 	"github.com/stretchr/testify/mock"
-	"hdwg3/cpt"
 	"os"
 	"testing"
 )

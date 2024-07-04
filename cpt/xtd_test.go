@@ -6,8 +6,8 @@ import (
 	"crypto/sha256"
 	"encoding/binary"
 	"encoding/hex"
-	"hdwg3/_test"
-	"hdwg3/pck"
+	"github.com/andrerrcosta2/hdwg3/_test"
+	"github.com/andrerrcosta2/hdwg3/pck"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -48,6 +48,7 @@ func TestFpt(t *testing.T) {
 	fin := xtd.Fpt()
 
 	pub, _ := xtd.Pub()
+
 	h := sha256.New()
 	h.Write(pub.SerializeCompressed())
 	res := binary.BigEndian.Uint32(h.Sum(nil)[:4])

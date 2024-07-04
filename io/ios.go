@@ -5,7 +5,7 @@
 package io
 
 import (
-	"hdwg3/cpt"
+	"github.com/andrerrcosta2/hdwg3/cpt"
 )
 
 type IOS interface {
